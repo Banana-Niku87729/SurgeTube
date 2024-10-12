@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SurgeTube</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* ダークモードのスタイル */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #e0e0e0;
+            }
+            .category-title {
+                border-bottom-color: #555;
+            }
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .video {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .thumbnail {
+            margin-right: 15px;
+            width: 150px;
+            height: auto;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .channel, .stats {
+            color: gray;
+        }
+
+        .stats {
+            margin-top: 5px;
+        }
+
+        /* ロゴのスタイル */
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            width: 300px; /* ロゴのサイズを調整 */
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <!-- ロゴ画像を配置 -->
+        <img src="asset/logo_jp.png" alt="SurgeTube Logo">
+    </div>
+
+    <div id="videoList"></div>
+
+    <script>
+        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここに取得したAPIキーを入力してください
+        const MAX_RESULTS = 30;
+        const API_URL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=JP&maxResults=${MAX_RESULTS}&key=${API_KEY}`;
+        const categories = {
+            "10": "音楽",
+            "17": "スポーツ",
+            "20": "ゲーム",
+        };
+
+        async function fetchYouTubeData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                displayVideos(data.items);
+            } catch (error) {
+                console.error('YouTube APIからのデータ取得に失敗しました:', error);
+            }
+        }
+
+        function displayVideos(videos) {
+            const videoList = document.getElementById('videoList');
+            const categorizedVideos = {};
+            const uncategorizedVideos = [];
+
+            // カテゴリ別に動画を分類
+            videos.forEach(video => {
+                const categoryId = video.snippet.categoryId;
+                if (categories[categoryId]) {
+                    if (!categorizedVideos[categoryId]) {
+                        categorizedVideos[categoryId] = [];
+                    }
+                    categorizedVideos[categoryId].push(video);
+                } else {
+                    // カテゴリIDが定義されていない動画は「その他」に分類
+                    uncategorizedVideos.push(video);
+                }
+            });
+
+            // 各カテゴリ内で視聴回数に基づいて動画をソート
+            Object.keys(categorizedVideos).forEach(categoryId => {
+                categorizedVideos[categoryId].sort((a, b) => {
+                    return Number(b.statistics.viewCount) - Number(a.statistics.viewCount);
+                });
+
+                const categorySection = createCategorySection(categories[categoryId], categorizedVideos[categoryId]);
+                videoList.appendChild(categorySection);
+            });
+
+            // 「その他」カテゴリの動画を1つにまとめて表示
+            if (uncategorizedVideos.length > 0) {
+                uncategorizedVideos.sort((a, b) => Number(b.statistics.viewCount) - Number(a.statistics.viewCount));
+                const otherCategorySection = createCategorySection("その他", uncategorizedVideos);
+                videoList.appendChild(otherCategorySection);
+            }
+        }
+
+        // カテゴリセクションを作成する関数
+        function createCategorySection(categoryName, videos) {
+            const categorySection = document.createElement('div');
+            categorySection.classList.add('category-section');
+
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.classList.add('category-title');
+            categoryTitle.innerText = categoryName;
+            categorySection.appendChild(categoryTitle);
+
+            videos.forEach((video, index) => {
+                const videoElement = document.createElement('div');
+                videoElement.classList.add('video');
+
+                const thumbnail = document.createElement('img');
+                thumbnail.src = video.snippet.thumbnails.high.url;
+                thumbnail.classList.add('thumbnail');
+                thumbnail.alt = video.snippet.title;
+
+                const videoInfo = document.createElement('div');
+
+                const title = document.createElement('div');
+                title.classList.add('title');
+                title.innerText = `${index + 1}. ${video.snippet.title}`;
+
+                const channel = document.createElement('div');
+                channel.classList.add('channel');
+                channel.innerText = `チャンネル: ${video.snippet.channelTitle}`;
+
+                const stats = document.createElement('div');
+                stats.classList.add('stats');
+                stats.innerText = `
+                    視聴回数: ${Number(video.statistics.viewCount).toLocaleString()} | 
+                    高評価: ${Number(video.statistics.likeCount).toLocaleString()}`;
+
+                const link = document.createElement('a');
+                link.href = `https://www.youtube.com/watch?v=${video.id}`;
+                link.target = '_blank';
+                link.appendChild(thumbnail);
+                link.appendChild(title);
+
+                videoInfo.appendChild(link);
+                videoInfo.appendChild(channel);
+                videoInfo.appendChild(stats);
+
+                videoElement.appendChild(thumbnail);
+                videoElement.appendChild(videoInfo);
+                categorySection.appendChild(videoElement);
+            });
+
+            return categorySection;
+        }
+
+        fetchYouTubeData();
+    </script>
+</body>
+</html>
