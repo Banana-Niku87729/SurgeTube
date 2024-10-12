@@ -75,12 +75,33 @@
             font-size: 32px;
             margin: 0;
         }
+            /* 通常時のロゴ */
+    .logo img.light-mode {
+        display: block;
+    }
+    
+    .logo img.dark-mode {
+        display: none;
+    }
+
+    /* ダークモード時のロゴ */
+    @media (prefers-color-scheme: dark) {
+        .logo img.light-mode {
+            display: none;
+        }
+        
+        .logo img.dark-mode {
+            display: block;
+        }
+    }
     </style>
 </head>
 <body>
     <div class="logo">
-        <!-- ロゴ画像を配置 -->
-        <img src="asset/logo_jp.png" alt="SurgeTube Logo">
+    <!-- 通常モード用のロゴ -->
+    <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
+    <!-- ダークモード用のロゴ -->
+    <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
     </div>
 
     <div id="videoList"></div>
