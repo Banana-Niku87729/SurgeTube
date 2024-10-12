@@ -13,7 +13,6 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* ダークモードのスタイル */
         @media (prefers-color-scheme: dark) {
             body {
                 background-color: #121212;
@@ -59,14 +58,13 @@
             margin-top: 5px;
         }
 
-        /* ロゴのスタイル */
         .logo {
             display: flex;
             align-items: center;
         }
 
         .logo img {
-            width: 300px; /* ロゴのサイズを調整 */
+            width: 300px;
             height: auto;
             margin-right: 10px;
         }
@@ -75,45 +73,44 @@
             font-size: 32px;
             margin: 0;
         }
-            /* 通常時のロゴ */
-    .logo img.light-mode {
-        display: block;
-    }
-    
-    .logo img.dark-mode {
-        display: none;
-    }
 
-    /* ダークモード時のロゴ */
-    @media (prefers-color-scheme: dark) {
         .logo img.light-mode {
-            display: none;
-        }
-        
-        .logo img.dark-mode {
             display: block;
         }
-    }
+    
+        .logo img.dark-mode {
+            display: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .logo img.light-mode {
+                display: none;
+            }
+            .logo img.dark-mode {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="logo">
-    <!-- 通常モード用のロゴ -->
-    <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
-    <!-- ダークモード用のロゴ -->
-    <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
+        <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
+        <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
     </div>
 
     <div id="videoList"></div>
 
     <script>
-        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここに取得したAPIキーを入力してください
-        const MAX_RESULTS = 30;
+        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここにAPIキーを入力
+        const MAX_RESULTS = 50;  // 50件取得してカテゴリごとに分ける
         const API_URL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=JP&maxResults=${MAX_RESULTS}&key=${API_KEY}`;
+        
         const categories = {
             "10": "音楽",
             "17": "スポーツ",
             "20": "ゲーム",
+            "24": "エンターテイメント",
+            "1": "ミュージックビデオ"  // ミュージックビデオカテゴリを追加
         };
 
         async function fetchYouTubeData() {
@@ -140,22 +137,27 @@
                     }
                     categorizedVideos[categoryId].push(video);
                 } else {
-                    // カテゴリIDが定義されていない動画は「その他」に分類
                     uncategorizedVideos.push(video);
                 }
             });
 
-            // 各カテゴリ内で視聴回数に基づいて動画をソート
+            // 各カテゴリで動画数が10未満の場合は補完
+            Object.keys(categorizedVideos).forEach(categoryId => {
+                if (categorizedVideos[categoryId].length < 10) {
+                    uncategorizedVideos.push(...categorizedVideos[categoryId]);
+                    delete categorizedVideos[categoryId];
+                }
+            });
+
+            // カテゴリごとに動画をソートし、最低10件表示
             Object.keys(categorizedVideos).forEach(categoryId => {
                 categorizedVideos[categoryId].sort((a, b) => {
                     return Number(b.statistics.viewCount) - Number(a.statistics.viewCount);
                 });
-
-                const categorySection = createCategorySection(categories[categoryId], categorizedVideos[categoryId]);
+                const categorySection = createCategorySection(categories[categoryId], categorizedVideos[categoryId].slice(0, 10));
                 videoList.appendChild(categorySection);
             });
 
-            // 「その他」カテゴリの動画を1つにまとめて表示
             if (uncategorizedVideos.length > 0) {
                 uncategorizedVideos.sort((a, b) => Number(b.statistics.viewCount) - Number(a.statistics.viewCount));
                 const otherCategorySection = createCategorySection("その他", uncategorizedVideos);
@@ -163,7 +165,6 @@
             }
         }
 
-        // カテゴリセクションを作成する関数
         function createCategorySection(categoryName, videos) {
             const categorySection = document.createElement('div');
             categorySection.classList.add('category-section');
