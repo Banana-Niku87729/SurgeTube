@@ -171,6 +171,8 @@
 
         function displayVideos(videos) {
             const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';  // リロード時にリストをクリア
+
             const categorizedVideos = {};
             const uncategorizedVideos = [];
 
@@ -253,7 +255,12 @@
             return categorySection;
         }
 
+        // データ取得と表示を最初に実行
         fetchYouTubeData();
+
+        // 一定時間ごとにデータを更新するためのタイマー (10分間隔)
+        const REFRESH_INTERVAL = 10 * 60 * 1000; // 10分をミリ秒に変換
+        setInterval(fetchYouTubeData, REFRESH_INTERVAL);
     </script>
 </body>
 </html>
