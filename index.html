@@ -212,68 +212,68 @@
         });
     }
 
-async function loadUserVideos() {
-    try {
-        const response = await gapi.client.youtube.channels.list({
-            part: 'contentDetails',
-            mine: true
-        });
+    async function loadUserVideos() {
+        try {
+            const response = await gapi.client.youtube.channels.list({
+                part: 'contentDetails',
+                mine: true
+            });
 
-        const channelId = response.result.items[0].id;
+            const channelId = response.result.items[0].id;
 
-        const videosResponse = await gapi.client.youtube.search.list({
-            part: 'snippet',
-            channelId: channelId,
-            type: 'video',
-            order: 'date', // 最新の動画を取得
-            maxResults: 10 // 最大10件の動画を取得
-        });
+            const videosResponse = await gapi.client.youtube.search.list({
+                part: 'snippet',
+                channelId: channelId,
+                type: 'video',
+                order: 'date', // 最新の動画を取得
+                maxResults: 10 // 最大10件の動画を取得
+            });
 
-        const videos = videosResponse.result.items;
-        displayUserVideos(videos);
-    } catch (error) {
-        console.error('ユーザ動画の取得に失敗しました:', error);
+            const videos = videosResponse.result.items;
+            displayUserVideos(videos);
+        } catch (error) {
+            console.error('ユーザ動画の取得に失敗しました:', error);
+        }
     }
-}
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // メッセージの処理
-    sendResponse({ result: "success" }); // 応答を送信
-}
-    
-function displayUserVideos(videos) {
-    const videoList = document.getElementById('videoList');
-    videoList.innerHTML = ''; // 一度クリア
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        // メッセージの処理
+        sendResponse({ result: "success" }); // 応答を送信
+    }); // この行に } が追加されました
 
-    videos.forEach(video => {
-        const videoElement = document.createElement('div');
-        videoElement.classList.add('video');
+    function displayUserVideos(videos) {
+        const videoList = document.getElementById('videoList');
+        videoList.innerHTML = ''; // 一度クリア
 
-        const thumbnail = document.createElement('img');
-        thumbnail.src = video.snippet.thumbnails.high.url;
-        thumbnail.classList.add('thumbnail');
-        thumbnail.alt = video.snippet.title;
+        videos.forEach(video => {
+            const videoElement = document.createElement('div');
+            videoElement.classList.add('video');
 
-        const title = document.createElement('div');
-        title.classList.add('title');
-        title.innerText = video.snippet.title;
+            const thumbnail = document.createElement('img');
+            thumbnail.src = video.snippet.thumbnails.high.url;
+            thumbnail.classList.add('thumbnail');
+            thumbnail.alt = video.snippet.title;
 
-        const stats = document.createElement('div');
-        stats.classList.add('stats');
-        stats.innerText = `動画ID: ${video.id}`; // 追加情報として表示
+            const title = document.createElement('div');
+            title.classList.add('title');
+            title.innerText = video.snippet.title;
 
-        const link = document.createElement('a');
-        link.href = `https://www.youtube.com/watch?v=${video.id}`;
-        link.target = '_blank';
-        link.innerText = '視聴する';
+            const stats = document.createElement('div');
+            stats.classList.add('stats');
+            stats.innerText = `動画ID: ${video.id}`; // 追加情報として表示
 
-        videoElement.appendChild(thumbnail);
-        videoElement.appendChild(title);
-        videoElement.appendChild(stats);
-        videoElement.appendChild(link);
-        videoList.appendChild(videoElement);
-    });
-}
+            const link = document.createElement('a');
+            link.href = `https://www.youtube.com/watch?v=${video.id}`;
+            link.target = '_blank';
+            link.innerText = '視聴する';
+
+            videoElement.appendChild(thumbnail);
+            videoElement.appendChild(title);
+            videoElement.appendChild(stats);
+            videoElement.appendChild(link);
+            videoList.appendChild(videoElement);
+        });
+    }
 
     // Google APIの初期化
     handleClientLoad();
