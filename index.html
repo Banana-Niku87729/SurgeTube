@@ -11,6 +11,7 @@
     <meta property="og:url" content="https://www.surgetube.f5.si/">
     <meta property="og:type" content="website">
     <link rel="icon" href="asset/favicon_128.png">
+    <link rel="manifest" href="manifest.json">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -145,6 +146,20 @@
     </div>
 
     <div id="videoList"></div>
+
+        <script>
+        // Service Worker登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
 
     <script>
         const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここにAPIキーを入力
