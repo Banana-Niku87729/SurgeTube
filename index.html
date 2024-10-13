@@ -236,6 +236,11 @@ async function loadUserVideos() {
     }
 }
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // メッセージの処理
+    sendResponse({ result: "success" }); // 応答を送信
+}
+    
 function displayUserVideos(videos) {
     const videoList = document.getElementById('videoList');
     videoList.innerHTML = ''; // 一度クリア
