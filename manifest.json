@@ -1,0 +1,21 @@
+{
+  "name": "SurgeTube",
+  "short_name": "SurgeTube",
+  "description": "SurgeTubeで流行している動画、曲を見つける。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "asset/favicon_128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "asset/favicon3.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
