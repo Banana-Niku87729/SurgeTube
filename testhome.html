@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SurgeTube</title>
+    <link rel="icon" href="asset/favicon3.png">
+    <meta property="og:title" content="SurgeTube">
+    <meta property="og:description" content="SurgeTubeで流行している動画、曲を見つける。">
+    <meta property="og:image" content="https://i.imgur.com/tbQR11p.png">
+    <meta property="og:url" content="https://www.surgetube.f5.si/">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#ff0000">
+    <link rel="icon" href="asset/favicon_128.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #e0e0e0;
+            }
+            .category-title {
+                border-bottom-color: #555;
+            }
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .video {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .thumbnail {
+            margin-right: 15px;
+            width: 150px;
+            height: auto;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .channel, .stats {
+            color: gray;
+        }
+
+        .stats {
+            margin-top: 5px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .logo img {
+            height: auto;
+        }
+
+        .logo .search-icon {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .logo img.light-mode {
+                display: none;
+            }
+            .logo img.dark-mode {
+                display: block;
+            }
+            .logo .search-icon.light-mode {
+                display: none;
+            }
+            .logo .search-icon.dark-mode {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .category-title {
+                font-size: 20px;
+                text-align: center;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            .video {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .thumbnail {
+                width: 100%;
+                max-width: 320px;
+                margin-bottom: 10px;
+            }
+
+            .title {
+                font-size: 14px;
+                text-align: center;
+            }
+
+            .channel, .stats {
+                text-align: center;
+                font-size: 12px;
+            }
+
+            .logo img {
+                width: 100px;
+                height: auto;
+            }
+
+            .logo h1 {
+                font-size: 20px;
+            }
+
+            .logo .search-icon {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
+        <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
+        <a href="検索ページのURL">
+            <img src="asset/search_icon_light.png" alt="Search Icon" class="light-mode search-icon">
+            <img src="asset/search_icon_dark.png" alt="Search Icon" class="dark-mode search-icon">
+        </a>
+    </div>
+
+    <div id="videoList"></div>
+
+    <script>
+        // Service Worker登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+
+    <script>
+        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここにAPIキーを入力
+        const MAX_RESULTS = 50;  // 50件取得してカテゴリごとに分ける
+        const API_URL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=JP&maxResults=${MAX_RESULTS}&key=${API_KEY}`;
+
+        const categories = {
+            "10": "音楽",
+            "17": "スポーツ",
+            "20": "ゲーム",
+            "24": "エンターテイメント",
+            "1": "ミュージックビデオ"  // ミュージックビデオカテゴリを追加
+        };
+
+        async function fetchYouTubeData() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                displayVideos(data.items);
+            } catch (error) {
+                console.error('YouTube APIからのデータ取得に失敗しました:', error);
+            }
+        }
+
+        function displayVideos(videos) {
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';  // リロード時にリストをクリア
+
+            const categorizedVideos = {};
+            const uncategorizedVideos = [];
+
+            videos.forEach(video => {
+                const categoryId = video.snippet.categoryId;
+                if (categories[categoryId]) {
+                    if (!categorizedVideos[categoryId]) {
+                        categorizedVideos[categoryId] = [];
+                    }
+                    categorizedVideos[categoryId].push(video);
+                } else {
+                    uncategorizedVideos.push(video);
+                }
+            });
+
+            Object.keys(categorizedVideos).forEach(categoryId => {
+                categorizedVideos[categoryId].sort((a, b) => {
+                    return Number(b.statistics.viewCount) - Number(a.statistics.viewCount);
+                });
+                const categorySection = createCategorySection(categories[categoryId], categorizedVideos[categoryId].slice(0, 10));
+                videoList.appendChild(categorySection);
+            });
+
+            if (uncategorizedVideos.length > 0) {
+                uncategorizedVideos.sort((a, b) => Number(b.statistics.viewCount) - Number(a.statistics.viewCount));
+                const otherCategorySection = createCategorySection("その他", uncategorizedVideos);
+                videoList.appendChild(otherCategorySection);
+            }
+        }
+
+        function createCategorySection(categoryName, videos) {
+            const categorySection = document.createElement('div');
+            categorySection.classList.add('category-section');
+
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.classList.add('category-title');
+            categoryTitle.innerText = categoryName;
+            categorySection.appendChild(categoryTitle);
+
+            videos.forEach((video, index) => {
+                const videoElement = document.createElement('div');
+                videoElement.classList.add('video');
+
+                const thumbnail = document.createElement('img');
+                thumbnail.src = video.snippet.thumbnails.high.url;
+                thumbnail.classList.add('thumbnail');
+                thumbnail.alt = video.snippet.title;
+
+                const videoInfo = document.createElement('div');
+
+                const title = document.createElement('div');
+                title.classList.add('title');
+                title.innerText = `${index + 1}. ${video.snippet.title}`;
+
+                const channel = document.createElement('div');
+                channel.classList.add('channel');
+                channel.innerText = `チャンネル: ${video.snippet.channelTitle}`;
+
+                const stats = document.createElement('div');
+                stats.classList.add('stats');
+                stats.innerText = `
+                    視聴回数: ${Number(video.statistics.viewCount).toLocaleString()} | 
+                    高評価: ${Number(video.statistics.likeCount).toLocaleString()}`;
+
+                const link = document.createElement('a');
+                link.href = `https://www.youtube.com/watch?v=${video.id}`;
+                link.target = '_blank';
+                link.appendChild(thumbnail);
+                link.appendChild(title);
+
+                videoInfo.appendChild(link);
+                videoInfo.appendChild(channel);
+                videoInfo.appendChild(stats);
+
+                videoElement.appendChild(thumbnail);
+                videoElement.appendChild(videoInfo);
+
+                categorySection.appendChild(videoElement);
+            });
+
+            return categorySection;
+        }
+
+        fetchYouTubeData();
+
+        // 定時間ごとに再取得して更新
+        setInterval(fetchYouTubeData, 60000);  // 1分ごとに更新
+    </script>
+</body>
+</html>
