@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SurgeTube Search</title>
+    <link rel="icon" href="asset/favicon3.png">
+    <meta property="og:title" content="SurgeTube Search">
+    <meta property="og:description" content="SurgeTubeで検索して人気の動画を見つける。">
+    <meta property="og:image" content="https://i.imgur.com/tbQR11p.png">
+    <meta property="og:url" content="https://www.surgetube.f5.si/">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#ff0000">
+    <link rel="icon" href="asset/favicon_128.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: black;
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* 横スクロールを無効にする */
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212;
+                color: #e0e0e0;
+            }
+        }
+
+        h1 {
+            text-align: center; /* タイトルを中央揃え */
+            margin: 20px 0;
+        }
+
+        #searchForm {
+            text-align: center; /* フォームを中央揃え */
+            margin: 20px 0;
+        }
+
+        #searchInput {
+            padding: 10px;
+            width: 80%; /* フォームの幅を調整 */
+            max-width: 400px; /* 最大幅を設定 */
+            box-sizing: border-box; /* パディングを含めたボックスサイズ */
+            margin-bottom: 10px; /* ボタンとの間にスペース */
+        }
+
+        #searchButton {
+            padding: 10px 20px; /* ボタンの内側のパディング */
+            cursor: pointer; /* カーソルをポインターに */
+            background-color: #ff0000; /* ボタンの背景色 */
+            color: white; /* ボタンの文字色 */
+            border: none; /* ボタンの枠線をなしに */
+            border-radius: 5px; /* ボタンに丸みを追加 */
+            transition: background-color 0.3s; /* ホバー時の色変更のアニメーション */
+        }
+
+        #searchButton:hover {
+            background-color: #e60000; /* ホバー時の背景色 */
+        }
+
+        .video {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;  /* サムネイルとテキストを揃える */
+            padding: 10px; /* パディングを追加 */
+            box-sizing: border-box; /* パディングを含めたボックスサイズ */
+            flex-direction: column; /* スマホ表示では縦に並べる */
+            align-items: center; /* 中央揃え */
+        }
+
+        .thumbnail {
+            width: 150px; /* PC表示でのサムネイル幅 */
+            height: auto;
+            transition: width 0.3s; /* 幅の変更にアニメーションを追加 */
+        }
+
+        @media (max-width: 767px) { /* スマホ表示用 */
+    .thumbnail {
+        width: 370px; /* スマホ表示でのサムネイル幅 */
+    }
+}
+
+        @media (min-width: 768px) { /* PC表示用 */
+            .video {
+                flex-direction: row; /* 横並び */
+                justify-content: flex-start; /* 左揃え */
+            }
+            .thumbnail {
+                width: 150px; /* PC表示でのサムネイル幅 */
+            }
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px 0; /* タイトルと周囲のスペース */
+        }
+
+        .channel, .stats {
+            color: gray;
+        }
+
+        .stats {
+            margin-top: 5px;
+        }
+
+        .rank-info {
+            color: blue;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>SurgeTube 検索</h1>
+    <div id="searchForm">
+        <input type="text" id="searchInput" placeholder="動画を検索..." />
+        <button id="searchButton">検索</button>
+    </div>
+
+    <div id="videoList"></div>
+
+    <script>
+        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここにAPIキーを入力
+        const MAX_RESULTS = 100;
+
+        const categories = {
+            "10": "音楽",
+            "17": "スポーツ",
+            "20": "ゲーム",
+            "24": "エンターテイメント",
+            "1": "ミュージックビデオ"
+        };
+
+        async function fetchYouTubeData(query) {
+            const API_URL = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&maxResults=${MAX_RESULTS}&key=${API_KEY}`;
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                displayVideos(data.items);
+            } catch (error) {
+                console.error('YouTube APIからのデータ取得に失敗しました:', error);
+            }
+        }
+
+        function displayVideos(videos) {
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';  // リストをクリア
+
+            videos.forEach((video, index) => {
+                const videoElement = document.createElement('div');
+                videoElement.classList.add('video');
+
+                // 動画ページへのリンクURL
+                const videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`;
+
+                const thumbnailLink = document.createElement('a');
+                thumbnailLink.href = videoUrl;
+                thumbnailLink.target = '_blank';  // 新しいタブで開く
+                const thumbnail = document.createElement('img');
+                thumbnail.src = video.snippet.thumbnails.high.url;
+                thumbnail.classList.add('thumbnail');
+                thumbnail.alt = video.snippet.title;
+                thumbnailLink.appendChild(thumbnail);
+
+                const videoInfo = document.createElement('div');
+
+                const titleLink = document.createElement('a');
+                titleLink.href = videoUrl;
+                titleLink.target = '_blank';  // 新しいタブで開く
+                titleLink.classList.add('title');
+                titleLink.innerText = video.snippet.title;
+
+                const channel = document.createElement('div');
+                channel.classList.add('channel');
+                channel.innerText = `チャンネル: ${video.snippet.channelTitle}`;
+
+                const stats = document.createElement('div');
+                stats.classList.add('stats');
+                stats.innerText = `順位なし`;
+
+                // 動画がランキングに含まれているかどうかをチェック
+                if (video.snippet.categoryId && categories[video.snippet.categoryId]) {
+                    const rankInfo = document.createElement('div');
+                    rankInfo.classList.add('rank-info');
+                    rankInfo.innerText = `カテゴリ: ${categories[video.snippet.categoryId]} | 順位: ${index + 1}`;
+                    channel.appendChild(rankInfo);
+                }
+
+                videoInfo.appendChild(titleLink);
+                videoInfo.appendChild(channel);
+                videoInfo.appendChild(stats);
+
+                videoElement.appendChild(thumbnailLink);
+                videoElement.appendChild(videoInfo);
+                videoList.appendChild(videoElement);
+            });
+        }
+
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const query = document.getElementById('searchInput').value;
+            fetchYouTubeData(query);
+        });
+    </script>
+</body>
+</html>
