@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SurgeTube 設定</title>
+    <link rel="icon" href="asset/favicon3.png">
+    <meta property="og:title" content="SurgeTube 設定">
+    <meta property="og:description" content="SurgeTubeの設定を行う。">
+    <meta property="og:image" content="https://i.imgur.com/tbQR11p.png">
+    <meta property="og:url" content="https://www.surgetube.f5.si/">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#ff0000">
+    <link rel="icon" href="asset/favicon_128.png">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white; /* デフォルトの背景色 */
+            color: black; /* デフォルトの文字色 */
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* 横スクロールを無効にする */
+        }
+
+        body.dark-mode {
+            background-color: #121212; /* ダークモード時の背景色 */
+            color: #e0e0e0; /* ダークモード時の文字色 */
+        }
+
+        h1 {
+            text-align: center; /* h1を中央揃え */
+            margin: 20px 0; /* 上下のマージンを追加 */
+        }
+
+        #settingsContainer {
+            width: 90%; /* コンテナの幅を調整 */
+            max-width: 600px; /* 最大幅を設定 */
+            margin: 0 auto; /* 中央揃え */
+            padding: 20px; /* パディングを追加 */
+            background-color: #f9f9f9; /* 背景色 */
+            border-radius: 8px; /* 角を丸める */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* シャドウ */
+            transition: background-color 0.3s; /* 背景色の変更にアニメーション */
+        }
+
+        body.dark-mode #settingsContainer {
+            background-color: #1e1e1e; /* ダークモード時の背景色 */
+        }
+
+        .button {
+            display: block; /* ボタンをブロック要素に */
+            margin: 10px auto; /* 上下のマージンを自動に */
+            padding: 10px 20px; /* 内側のパディング */
+            cursor: pointer; /* カーソルをポインターに */
+            background-color: #007bff; /* ボタンの背景色 */
+            color: white; /* ボタンの文字色 */
+            border: none; /* ボタンの枠線をなしに */
+            border-radius: 5px; /* ボタンに丸みを追加 */
+            transition: background-color 0.3s; /* ホバー時の色変更のアニメーション */
+            text-align: center; /* 中央揃え */
+            width: 100%; /* 幅を100%に */
+        }
+
+        body.dark-mode .button {
+            background-color: #007bff; /* ダークモード時のボタンの背景色 */
+        }
+
+        body.dark-mode .button:hover {
+            background-color: #0056b3; /* ダークモード時のホバー時の背景色 */
+        }
+
+        .creator-exclusion {
+            margin: 10px 0; /* マージンを追加 */
+        }
+
+        .exclusion-list {
+            margin: 10px 0; /* マージンを追加 */
+            list-style-type: none; /* リストのスタイルをなしに */
+            padding: 0; /* パディングをなしに */
+        }
+
+        .exclusion-item {
+            display: flex; /* アイテムをフレックスボックスで配置 */
+            justify-content: space-between; /* スペースを均等に */
+            align-items: center; /* 中央揃え */
+            margin: 5px 0; /* 上下のマージン */
+            padding: 5px; /* 内側のパディング */
+            border: 1px solid #ccc; /* 枠線 */
+            border-radius: 4px; /* 角を丸める */
+            transition: border-color 0.3s; /* 枠線色の変更にアニメーション */
+        }
+
+        body.dark-mode .exclusion-item {
+            border-color: #444; /* ダークモード時の枠線色 */
+        }
+
+        .remove-button {
+            cursor: pointer; /* カーソルをポインターに */
+            color: red; /* 削除ボタンの色 */
+        }
+    </style>
+</head>
+<body>
+    <h1>SurgeTube 設定</h1>
+    <div id="settingsContainer">
+        <button class="button" id="toggleTheme">ダークモード/ホワイトモード切替</button>
+        <div class="creator-exclusion">
+            <h2>クリエイター除外設定</h2>
+            <input type="text" id="excludeChannelInput" placeholder="チャンネルURLを入力..." />
+            <button class="button" id="addExclusion">除外追加</button>
+            <ul class="exclusion-list" id="exclusionList"></ul>
+        </div>
+        <button class="button" id="requestExclusion">動画クリエイター除外申請</button>
+    </div>
+
+    <script>
+        const toggleThemeButton = document.getElementById('toggleTheme');
+        const exclusionListElement = document.getElementById('exclusionList');
+        const excludeChannelInput = document.getElementById('excludeChannelInput');
+        const addExclusionButton = document.getElementById('addExclusion');
+        const requestExclusionButton = document.getElementById('requestExclusion');
+
+        // 除外設定の配列
+        let exclusions = [];
+
+        // 初期テーマの設定
+        document.addEventListener('DOMContentLoaded', () => {
+            const isDarkMode = localStorage.getItem('dark-mode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        });
+
+        toggleThemeButton.addEventListener('click', () => {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('dark-mode', isDarkMode); // テーマ状態を保存
+        });
+
+        addExclusionButton.addEventListener('click', () => {
+            const channelUrl = excludeChannelInput.value.trim();
+            if (channelUrl) {
+                exclusions.push(channelUrl);
+                updateExclusionList();
+                excludeChannelInput.value = ''; // 入力フィールドをクリア
+            } else {
+                alert('チャンネルURLを入力してください。');
+            }
+        });
+
+        function updateExclusionList() {
+            exclusionListElement.innerHTML = ''; // リストをクリア
+            exclusions.forEach((url, index) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('exclusion-item');
+                listItem.innerText = url;
+
+                const removeButton = document.createElement('span');
+                removeButton.classList.add('remove-button');
+                removeButton.innerText = '削除';
+                removeButton.addEventListener('click', () => {
+                    exclusions.splice(index, 1); // 除外リストから削除
+                    updateExclusionList(); // リストを再表示
+                });
+
+                listItem.appendChild(removeButton);
+                exclusionListElement.appendChild(listItem);
+            });
+        }
+
+        requestExclusionButton.addEventListener('click', () => {
+            window.open('https://example.com/your-google-form-url', '_blank'); // GoogleフォームのURLを指定
+        });
+    </script>
+</body>
+</html>
