@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SurgeTube - 検索</title>
+    <title>SurgeTube Search</title>
     <link rel="icon" href="asset/favicon3.png">
     <meta property="og:title" content="SurgeTube Search">
     <meta property="og:description" content="SurgeTubeで検索して人気の動画を見つける。">
@@ -80,10 +80,10 @@
         }
 
         @media (max-width: 767px) { /* スマホ表示用 */
-    .thumbnail {
-        width: 370px; /* スマホ表示でのサムネイル幅 */
-    }
-}
+            .thumbnail {
+                width: 370px; /* スマホ表示でのサムネイル幅 */
+            }
+        }
 
         @media (min-width: 768px) { /* PC表示用 */
             .video {
@@ -204,7 +204,6 @@
                 videoInfo.appendChild(titleLink);
                 videoInfo.appendChild(channel);
                 videoInfo.appendChild(stats);
-
                 videoElement.appendChild(thumbnailLink);
                 videoElement.appendChild(videoInfo);
                 videoList.appendChild(videoElement);
@@ -213,7 +212,23 @@
 
         document.getElementById('searchButton').addEventListener('click', () => {
             const query = document.getElementById('searchInput').value;
-            fetchYouTubeData(query);
+            if (query) {
+                fetchYouTubeData(query);
+            } else {
+                alert('検索ワードを入力してください。');
+            }
+        });
+
+        // 「!setting」コマンドの入力で設定画面に遷移
+        document.getElementById('searchInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const query = this.value;
+                if (query === '!setting') {
+                    window.location.href = 'setting.html'; // 設定画面のURL
+                } else {
+                    fetchYouTubeData(query);
+                }
+            }
         });
     </script>
 </body>
