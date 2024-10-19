@@ -69,18 +69,20 @@
         .logo {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            width: 100%;
         }
 
         .logo img {
-            width: 300px;
+            width: 120px; /* ロゴの大きさを調整 */
             height: auto;
-            margin-right: 10px;
         }
 
-        .logo h1 {
-            font-size: 32px;
-            margin: 0;
+        .logo .search-icon {
+            width: 30px; /* 新しいサイズ */
+            height: 30px; /* 新しいサイズ */
         }
+　　　　　　　　　　　　　　　　　
 
         .logo img.light-mode {
             display: block;
@@ -99,7 +101,23 @@
             }
         }
 
-        /* スマホ向けのスタイル */
+        .logo .search-icon.light-mode {
+            display: block;
+        }
+
+        .logo .search-icon.dark-mode {
+            display: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .logo .search-icon.light-mode {
+                display: none;
+            }
+            .logo .search-icon.dark-mode {
+                display: block;
+            }
+        }
+
         @media (max-width: 768px) {
             .category-title {
                 font-size: 20px;
@@ -137,6 +155,11 @@
             .logo h1 {
                 font-size: 20px;
             }
+
+            .logo .search-icon {
+                width: 30px;
+                height: 30px;
+            }
         }
     </style>
 </head>
@@ -144,11 +167,15 @@
     <div class="logo">
         <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
         <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
+        <a href="search">
+            <img src="asset/search_icon_light.png" alt="Search Icon" class="light-mode search-icon">
+            <img src="asset/search_icon_dark.png"　alt="Search Icon" class="dark-mode search-icon">
+        </a>
     </div>
 
     <div id="videoList"></div>
 
-        <script>
+    <script>
         // Service Worker登録
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
@@ -265,18 +292,17 @@
 
                 videoElement.appendChild(thumbnail);
                 videoElement.appendChild(videoInfo);
+
                 categorySection.appendChild(videoElement);
             });
 
             return categorySection;
         }
 
-        // データ取得と表示を最初に実行
         fetchYouTubeData();
 
-        // 一定時間ごとにデータを更新するためのタイマー (10分間隔)
-        const REFRESH_INTERVAL = 10 * 60 * 1000; // 10分をミリ秒に変換
-        setInterval(fetchYouTubeData, REFRESH_INTERVAL);
+        // 定時間ごとに再取得して更新
+        setInterval(fetchYouTubeData, 60000);  // 1分ごとに更新
     </script>
 </body>
 </html>
