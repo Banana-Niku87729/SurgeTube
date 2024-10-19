@@ -74,13 +74,16 @@
         }
 
         .logo img {
+            width: 120px; /* ロゴの大きさを調整 */
             height: auto;
         }
 
-        .logo .search-icon {
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
+        .logo img.light-mode {
+            display: block;
+        }
+
+        .logo img.dark-mode {
+            display: none;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -90,6 +93,17 @@
             .logo img.dark-mode {
                 display: block;
             }
+        }
+
+        .logo .search-icon.light-mode {
+            display: block;
+        }
+
+        .logo .search-icon.dark-mode {
+            display: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
             .logo .search-icon.light-mode {
                 display: none;
             }
