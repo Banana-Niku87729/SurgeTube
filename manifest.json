@@ -13,7 +13,7 @@
       "type": "image/png"
     },
     {
-      "src": "asset/favicon_mobile.png",
+      "src": "asset/favicon_512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
