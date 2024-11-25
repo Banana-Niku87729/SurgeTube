@@ -64,88 +64,36 @@
 
         .video {
             display: flex;
-            margin-bottom: 20px;
-            align-items: flex-start;
-            padding: 10px;
-            box-sizing: border-box;
             flex-direction: column;
             align-items: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
-        .thumbnail {
-            width: 150px;
-            height: auto;
-            cursor: pointer;
-            transition: width 0.3s;
-        }
-
-        @media (max-width: 767px) {
-            .thumbnail {
-                width: 370px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .video {
-                flex-direction: row;
-                justify-content: flex-start;
-            }
-            .thumbnail {
-                width: 150px;
-            }
+        iframe {
+            width: 100%;
+            max-width: 560px;
+            height: 315px;
+            border: none;
+            margin-bottom: 10px;
         }
 
         .title {
             font-size: 16px;
             font-weight: bold;
             margin: 5px 0;
+            text-align: center;
         }
 
-        .channel, .stats {
+        .channel {
             color: gray;
         }
 
-        #popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        #popup button {
-            margin: 5px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #popup .youtube-button {
-            background-color: #ff0000;
-            color: white;
-        }
-
-        #popup .surgetube-button {
-            background-color: #00c853;
-            color: white;
-        }
-
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+        @media (max-width: 767px) {
+            iframe {
+                height: auto;
+            }
         }
     </style>
 </head>
@@ -157,13 +105,6 @@
     </div>
 
     <div id="videoList"></div>
-
-    <div id="popup">
-        <p>どちらで動画を再生しますか？</p>
-        <button class="youtube-button">YouTubeで開く</button>
-        <button class="surgetube-button">SurgeTubeで開く</button>
-    </div>
-    <div id="overlay"></div>
 
     <script>
         const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98'; // ここにAPIキーを入力
@@ -188,54 +129,38 @@
                 const videoElement = document.createElement('div');
                 videoElement.classList.add('video');
 
-                const videoUrl = `https://www.youtube.com/watch?v=${video.id.videoId}`;
-                const surgetubeUrl = `https://www.surgetube.f5.si/watch?v=${video.id.videoId}&quality=360p`;
+                const youtubeEmbedUrl = `https://www.youtube.com/embed/${video.id.videoId}`;
+                const surgetubeEmbedUrl = `https://www.surgetube.f5.si/embed/${video.id.videoId}`; // 仮の埋め込みURL
 
-                const thumbnail = document.createElement('img');
-                thumbnail.src = video.snippet.thumbnails.high.url;
-                thumbnail.classList.add('thumbnail');
-                thumbnail.alt = video.snippet.title;
+                // YouTube埋め込み
+                const youtubeIframe = document.createElement('iframe');
+                youtubeIframe.src = youtubeEmbedUrl;
+                youtubeIframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                youtubeIframe.allowFullscreen = true;
 
-                thumbnail.addEventListener('click', () => showPopup(videoUrl, surgetubeUrl));
+                // SurgeTube埋め込み
+                const surgetubeIframe = document.createElement('iframe');
+                surgetubeIframe.src = surgetubeEmbedUrl;
+                surgetubeIframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                surgetubeIframe.allowFullscreen = true;
 
+                // タイトル
                 const title = document.createElement('div');
                 title.classList.add('title');
                 title.innerText = video.snippet.title;
 
+                // チャンネル名
                 const channel = document.createElement('div');
                 channel.classList.add('channel');
                 channel.innerText = `チャンネル: ${video.snippet.channelTitle}`;
 
-                videoElement.appendChild(thumbnail);
                 videoElement.appendChild(title);
+                videoElement.appendChild(youtubeIframe);
+                videoElement.appendChild(surgetubeIframe);
                 videoElement.appendChild(channel);
 
                 videoList.appendChild(videoElement);
             });
-        }
-
-        function showPopup(youtubeUrl, surgetubeUrl) {
-            const popup = document.getElementById('popup');
-            const overlay = document.getElementById('overlay');
-            popup.style.display = 'block';
-            overlay.style.display = 'block';
-
-            popup.querySelector('.youtube-button').onclick = () => {
-                window.open(youtubeUrl, '_blank');
-                closePopup();
-            };
-
-            popup.querySelector('.surgetube-button').onclick = () => {
-                window.open(surgetubeUrl, '_blank');
-                closePopup();
-            };
-        }
-
-        function closePopup() {
-            const popup = document.getElementById('popup');
-            const overlay = document.getElementById('overlay');
-            popup.style.display = 'none';
-            overlay.style.display = 'none';
         }
 
         document.getElementById('searchButton').addEventListener('click', () => {
