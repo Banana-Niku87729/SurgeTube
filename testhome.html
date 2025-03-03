@@ -11,6 +11,9 @@
     <meta property="og:url" content="https://www.surgetube.f5.si/">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#ff0000">
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <link rel="icon" href="asset/favicon_128.png">
     <link rel="manifest" href="manifest.json">
     <style>
@@ -19,6 +22,7 @@
             background-color: white;
             color: black;
             transition: background-color 0.3s, color 0.3s;
+            padding: 0 15px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -29,6 +33,39 @@
             .category-title {
                 border-bottom-color: #555;
             }
+            .login-button, .logout-button {
+                background-color: #333;
+                color: white;
+                border: 1px solid #555;
+            }
+            .modal-content {
+                background-color: #222;
+                color: #e0e0e0;
+            }
+            .close {
+                color: #aaa;
+            }
+            .close:hover, .close:focus {
+                color: white;
+            }
+            input[type="text"], input[type="password"] {
+                background-color: #333;
+                color: #e0e0e0;
+                border: 1px solid #555;
+            }
+            .login-form button {
+                background-color: #333;
+                color: white;
+                border: 1px solid #555;
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 0;
         }
 
         .category-section {
@@ -69,20 +106,18 @@
         .logo {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            width: 100%;
         }
 
         .logo img {
-            width: 120px; /* ロゴの大きさを調整 */
+            width: 120px;
             height: auto;
         }
 
         .logo .search-icon {
-            width: 30px; /* 新しいサイズ */
-            height: 30px; /* 新しいサイズ */
+            width: 30px;
+            height: 30px;
+            margin-left: 15px;
         }
-　　　　　　　　　　　　　　　　　
 
         .logo img.light-mode {
             display: block;
@@ -118,8 +153,113 @@
             }
         }
 
+        .login-button, .logout-button {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .login-button:hover, .logout-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-form input {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .login-form button {
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .login-form button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .my-videos-section {
+            margin-bottom: 30px;
+            border-left: 4px solid #ff0000;
+            padding-left: 15px;
+        }
+
+        .my-videos-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            color: #ff0000;
+        }
+
+        .personal-note {
+            font-style: italic;
+            margin-top: 5px;
+            color: #ff0000;
+        }
+
         @media (max-width: 768px) {
-            .category-title {
+            .category-title, .my-videos-title {
                 font-size: 20px;
                 text-align: center;
                 border-bottom: none;
@@ -135,6 +275,7 @@
                 width: 100%;
                 max-width: 320px;
                 margin-bottom: 10px;
+                margin-right: 0;
             }
 
             .title {
@@ -152,25 +293,63 @@
                 height: auto;
             }
 
-            .logo h1 {
-                font-size: 20px;
+            .header {
+                flex-direction: column;
+                align-items: center;
             }
 
-            .logo .search-icon {
-                width: 30px;
-                height: 30px;
+            .logo {
+                margin-bottom: 10px;
+            }
+
+            .auth-container {
+                margin-top: 10px;
+            }
+
+            .modal-content {
+                width: 90%;
+                margin: 30% auto;
             }
         }
     </style>
 </head>
 <body>
-    <div class="logo">
-        <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
-        <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
-        <a href="search">
-            <img src="asset/search_icon_light.png" alt="Search Icon" class="light-mode search-icon">
-            <img src="asset/search_icon_dark.png"　alt="Search Icon" class="dark-mode search-icon">
-        </a>
+    <div class="header">
+        <div class="logo">
+            <img src="asset/logo_jp.png" alt="SurgeTube Logo" class="light-mode">
+            <img src="asset/logo_jp_dark.png" alt="SurgeTube Logo" class="dark-mode">
+            <a href="search">
+                <img src="asset/search_icon_light.png" alt="Search Icon" class="light-mode search-icon">
+                <img src="asset/search_icon_dark.png" alt="Search Icon" class="dark-mode search-icon">
+            </a>
+        </div>
+        
+        <div class="auth-container">
+            <button id="loginButton" class="login-button">ログイン</button>
+            <div id="userInfo" class="user-info">
+                <img id="userAvatar" class="user-avatar" src="" alt="ユーザーアバター">
+                <span id="userName" class="user-name"></span>
+                <button id="logoutButton" class="logout-button">ログアウト</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ログインモーダル -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>ログイン</h2>
+            <form id="loginForm" class="login-form">
+                <input type="text" id="channelId" placeholder="YouTubeチャンネルID" required>
+                <input type="password" id="password" placeholder="パスワード" required>
+                <button type="submit">ログイン</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="myVideosSection" style="display: none;" class="my-videos-section">
+        <h2 class="my-videos-title">あなたの動画</h2>
+        <div id="myVideosList"></div>
     </div>
 
     <div id="videoList"></div>
@@ -190,8 +369,8 @@
     </script>
 
     <script>
-        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';  // ←ここにAPIキーを入力
-        const MAX_RESULTS = 50;  // 50件取得してカテゴリごとに分ける
+        const API_KEY = 'AIzaSyBDgJ2mKrQZnpzKxztKwmXZOHdeiK47D98';
+        const MAX_RESULTS = 50;
         const API_URL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=JP&maxResults=${MAX_RESULTS}&key=${API_KEY}`;
 
         const categories = {
@@ -199,9 +378,187 @@
             "17": "スポーツ",
             "20": "ゲーム",
             "24": "エンターテイメント",
-            "1": "ミュージックビデオ"  // ミュージックビデオカテゴリを追加
+            "1": "ミュージックビデオ"
         };
 
+        // ログイン関連の要素
+        const loginButton = document.getElementById('loginButton');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const logoutButton = document.getElementById('logoutButton');
+        const loginModal = document.getElementById('loginModal');
+        const closeModal = document.querySelector('.close');
+        const loginForm = document.getElementById('loginForm');
+        const myVideosSection = document.getElementById('myVideosSection');
+        const myVideosList = document.getElementById('myVideosList');
+
+        // ログイン状態を確認
+        let currentUser = JSON.parse(localStorage.getItem('surgetubeUser')) || null;
+
+        // ログイン状態によってUIを更新
+        function updateAuthUI() {
+            if (currentUser) {
+                loginButton.style.display = 'none';
+                userInfo.style.display = 'flex';
+                userName.textContent = currentUser.name;
+                userAvatar.src = currentUser.avatar || 'asset/default_avatar.png';
+                myVideosSection.style.display = 'block';
+                fetchUserVideos(currentUser.channelId);
+            } else {
+                loginButton.style.display = 'block';
+                userInfo.style.display = 'none';
+                myVideosSection.style.display = 'none';
+                myVideosList.innerHTML = '';
+            }
+        }
+
+        // 初期表示時にログイン状態を反映
+        updateAuthUI();
+
+        // ログインボタンクリック時の処理
+        loginButton.addEventListener('click', function() {
+            loginModal.style.display = 'block';
+        });
+
+        // モーダルを閉じる処理
+        closeModal.addEventListener('click', function() {
+            loginModal.style.display = 'none';
+        });
+
+        // モーダル外クリックでも閉じる
+        window.addEventListener('click', function(event) {
+            if (event.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+
+        // ログインフォームの送信処理
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const channelId = document.getElementById('channelId').value;
+            const password = document.getElementById('password').value;
+
+            // 実際のアプリではサーバーに認証リクエストを送信しますが、
+            // このデモでは簡易的にクライアント側で処理します
+            
+            // チャンネル情報を取得（実際のアプリではAPI認証を使用）
+            fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${API_KEY}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.items && data.items.length > 0) {
+                    // デモ用に認証成功とする（パスワードチェックは省略）
+                    const channelData = data.items[0].snippet;
+                    currentUser = {
+                        channelId: channelId,
+                        name: channelData.title,
+                        avatar: channelData.thumbnails.default.url
+                    };
+                    localStorage.setItem('surgetubeUser', JSON.stringify(currentUser));
+                    
+                    // UIを更新
+                    updateAuthUI();
+                    
+                    // モーダルを閉じる
+                    loginModal.style.display = 'none';
+                    
+                    // フォームをリセット
+                    loginForm.reset();
+                } else {
+                    alert('チャンネルIDが見つかりませんでした。');
+                }
+            })
+            .catch(error => {
+                console.error('チャンネル情報の取得に失敗しました:', error);
+                alert('ログインに失敗しました。後でもう一度お試しください。');
+            });
+        });
+
+        // ログアウトボタンクリック時の処理
+        logoutButton.addEventListener('click', function() {
+            localStorage.removeItem('surgetubeUser');
+            currentUser = null;
+            updateAuthUI();
+        });
+
+        // ユーザーの動画を取得する関数
+        async function fetchUserVideos(channelId) {
+            try {
+                // チャンネル動画を取得するURLを作成（実際のアプリではplaylistIdを使用します）
+                const channelVideosURL = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&maxResults=5&type=video&key=${API_KEY}`;
+                
+                const response = await fetch(channelVideosURL);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    // 動画IDだけを抽出
+                    const videoIds = data.items.map(item => item.id.videoId).join(',');
+                    
+                    // 動画の詳細情報を取得
+                    const videosDetailsURL = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoIds}&key=${API_KEY}`;
+                    const detailsResponse = await fetch(videosDetailsURL);
+                    const detailsData = await detailsResponse.json();
+                    
+                    displayUserVideos(detailsData.items);
+                } else {
+                    myVideosList.innerHTML = '<p>動画がありません。</p>';
+                }
+            } catch (error) {
+                console.error('ユーザーの動画取得に失敗しました:', error);
+                myVideosList.innerHTML = '<p>動画の読み込み中にエラーが発生しました。</p>';
+            }
+        }
+
+        // ユーザーの動画を表示する関数
+        function displayUserVideos(videos) {
+            myVideosList.innerHTML = '';
+            
+            if (!videos || videos.length === 0) {
+                myVideosList.innerHTML = '<p>動画がありません。</p>';
+                return;
+            }
+
+            videos.forEach((video, index) => {
+                const videoElement = document.createElement('div');
+                videoElement.classList.add('video');
+
+                const thumbnail = document.createElement('img');
+                thumbnail.src = video.snippet.thumbnails.high.url;
+                thumbnail.classList.add('thumbnail');
+                thumbnail.alt = video.snippet.title;
+
+                const videoInfo = document.createElement('div');
+
+                const title = document.createElement('div');
+                title.classList.add('title');
+                title.innerText = `${video.snippet.title}`;
+
+                const personalNote = document.createElement('div');
+                personalNote.classList.add('personal-note');
+                personalNote.innerText = 'あなたの動画';
+
+                const stats = document.createElement('div');
+                stats.classList.add('stats');
+                stats.innerText = `視聴回数: ${Number(video.statistics.viewCount).toLocaleString()} | 高評価: ${Number(video.statistics.likeCount || 0).toLocaleString()}`;
+
+                const link = document.createElement('a');
+                link.href = `https://www.youtube.com/watch?v=${video.id}`;
+                link.target = '_blank';
+                link.appendChild(title);
+
+                videoInfo.appendChild(link);
+                videoInfo.appendChild(personalNote);
+                videoInfo.appendChild(stats);
+
+                videoElement.appendChild(thumbnail);
+                videoElement.appendChild(videoInfo);
+
+                myVideosList.appendChild(videoElement);
+            });
+        }
+
+        // 人気動画を取得する関数
         async function fetchYouTubeData() {
             try {
                 const response = await fetch(API_URL);
@@ -212,6 +569,7 @@
             }
         }
 
+        // 人気動画を表示する関数
         function displayVideos(videos) {
             const videoList = document.getElementById('videoList');
             videoList.innerHTML = '';  // リロード時にリストをクリア
@@ -246,6 +604,7 @@
             }
         }
 
+        // カテゴリセクションを作成する関数
         function createCategorySection(categoryName, videos) {
             const categorySection = document.createElement('div');
             categorySection.classList.add('category-section');
@@ -276,9 +635,7 @@
 
                 const stats = document.createElement('div');
                 stats.classList.add('stats');
-                stats.innerText = `
-                    視聴回数: ${Number(video.statistics.viewCount).toLocaleString()} | 
-                    高評価: ${Number(video.statistics.likeCount).toLocaleString()}`;
+                stats.innerText = `視聴回数: ${Number(video.statistics.viewCount).toLocaleString()} | 高評価: ${Number(video.statistics.likeCount || 0).toLocaleString()}`;
 
                 const link = document.createElement('a');
                 link.href = `https://www.youtube.com/watch?v=${video.id}`;
@@ -299,6 +656,7 @@
             return categorySection;
         }
 
+        // 初期データ取得
         fetchYouTubeData();
 
         // 定時間ごとに再取得して更新
